@@ -5,13 +5,7 @@ import time
 from email.parser import Parser
 from email.header import decode_header
 from envelopes import Envelope
-
-
-pophost = 'pop.126.com'
-smtphost = 'smtp.126.com'
-useremail = 'trainmonitor@126.com'
-toemail = 'fiercewind@outlook.com'
-password = '123456'
+import Global
 
 
 def guess_charset(msg):
@@ -46,22 +40,22 @@ def Get_info(msg):
 
 def SentEmail(message,subject,image=True):
     envelope = Envelope(
-    from_addr=(useremail, u'Train'),
-    to_addr=(toemail, u'FierceX'),
+    from_addr=(Global.useremail, u'Train'),
+    to_addr=(Global.toemail, u'FierceX'),
     subject=subject,
     text_body=message
     )
     if image:
         envelope.add_attachment('NN.png')
     
-    envelope.send(smtphost, login=useremail,
-              password=password, tls=True)
+    envelope.send(Global.smtphost, login=Global.useremail,
+              password=Global.password, tls=True)
     
 def ReEmail():
     try:
-        pp = poplib.POP3(pophost)
-        pp.user(useremail)
-        pp.pass_(password)
+        pp = poplib.POP3(Global.pophost)
+        pp.user(Global.useremail)
+        pp.pass_(Global.password)
         resp, mails, octets = pp.list()
         index = len(mails)
         if index > 0:
