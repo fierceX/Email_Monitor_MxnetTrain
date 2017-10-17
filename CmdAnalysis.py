@@ -99,7 +99,7 @@ class CmdAnaly:
         self.CmdList = []
         self.Add(ExitCmd('exit'))
         self.Add(TrainCmd('train'))
-        self.Add(SetNameParamsCmd('name'))
+        self.Add(SetNameParamsCmd('setname'))
 
     def Add(self, cmd):
         self.CmdList.append(cmd)
