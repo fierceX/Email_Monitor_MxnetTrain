@@ -9,31 +9,23 @@ import EmailTool
 import Global
 
 
-def nn(params):
+def nn(params,nameparams):
     train, test = NN_Train.GetDate()
+    print(params)
+    print(nameparams)
     msg = ('%s\n') % str(params)
+    msg += ('%s\n') % str(nameparams)
     msg += NN_Train.NN_Train(
         NN_Train.GetNN(),
         train_data=train,
         test_data=test,
-        epochs=int(params['ep']),
-        batch_size=int(params['bs']),
-        learning_rate=params['lr'],
-        weight_decay=params['wd'])
-    EmailTool.SentEmail(msg, 'TrainResult')
+        params = params,
+        nameparams = nameparams)
+    EmailTool.SentEmail(msg, 'TrainResult',os.path.join(nameparams['dir'],nameparams['png']))
 
 
-def run(msg):
-
-    params = {'ep': 10, 'lr': 0.002, 'bs': 128, 'wd': 0.0}
-    xx = msg.split('\r\n')
-    for k in xx:
-        ks = k.split(' ')
-        if len(ks) > 1:
-            params[ks[0]] = float(ks[1])
-    print(params)
-
-    p = Process(target=nn, args=(params,))
+def run():
+    p = Process(target=nn,args=(Global.params,Global.nameparams,))
     print('TrainStrart')
     Global.running = True
     p.start()
@@ -42,42 +34,77 @@ def run(msg):
 
 
 class BaseCmd:
-    def __init__(self,cmd):
+    def __init__(self, cmd):
         self.Next = None
         self.cmd = cmd
-    def SetNext(self,n):
+
+    def SetNext(self, n):
         self.Next = n
-    def DoAnalysis(self,cmd,params):
+
+    def DoAnalysis(self, cmd, params):
         if cmd == self.cmd:
             self.Work(params)
         elif self.Next is not None:
-            self.Next.DoAnalysis(cmd,params)
-    def Work(self,params):
+            self.Next.DoAnalysis(cmd, params)
+
+    def Work(self, params):
         pass
 
+
 class TrainCmd(BaseCmd):
-    def __init__(self,cmd):
-        BaseCmd.__init__(self,cmd)
-    def Work(self,params):
+    def __init__(self, cmd):
+        BaseCmd.__init__(self, cmd)
+
+    def Work(self, msg):
         print('train')
         if Global.running == False:
-            t = threading.Thread(target=run, args=(params,))
+            xx = msg.split('\r\n')
+            for k in xx:
+                ks = k.split(' ')
+                if len(ks) > 1:
+                    Global.params[ks[0]] = float(ks[1])
+            print(Global.params)
+            t = threading.Thread(target=run)
             t.start()
         else:
             EmailTool.SentEmail('Training is underway',
-            'Training is underway',
-            mage=False)
+                                'Training is underway',
+                                None,
+                                mage=False)
+
+
 class ExitCmd(BaseCmd):
-    def __init__(self,cmd):
-        BaseCmd.__init__(self,cmd)
-    def Work(self,params):
+    def __init__(self, cmd):
+        BaseCmd.__init__(self, cmd)
+
+    def Work(self, params):
         print('exit')
         os._exit(0)
 
+class SetNameParamsCmd(BaseCmd):
+    def __init__(self,cmd):
+        BaseCmd.__init__(self,cmd)
+    
+    def Work(self,msg):
+        xx = msg.split('\r\n')
+        for k in xx:
+             ks = k.split(' ')
+             if len(ks) > 1:
+                 Global.nameparams[ks[0]] = ks[1]
+        print(Global.nameparams)
+
+
 class CmdAnaly:
     def __init__(self):
-        self.exitcmd = ExitCmd('exit')
-        self.traincmd = TrainCmd('train')
-        self.exitcmd.SetNext(self.traincmd)
-    def Analy(self,cmd,params):
-        self.exitcmd.DoAnalysis(cmd,params)
+        self.CmdList = []
+        self.Add(ExitCmd('exit'))
+        self.Add(TrainCmd('train'))
+        self.Add(SetNameParamsCmd('name'))
+
+    def Add(self, cmd):
+        self.CmdList.append(cmd)
+        if len(self.CmdList) > 1:
+            self.CmdList[len(self.CmdList) - 2].SetNext(self.CmdList[len(self.CmdList) - 1])
+
+    def Analy(self, cmd, params):
+        self.CmdList[0].DoAnalysis(cmd, params)

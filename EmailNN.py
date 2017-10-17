@@ -1,14 +1,8 @@
-import multiprocessing
-from multiprocessing import Process
 import time
-import threading
 import NN_Train
 import EmailTool
 import CmdAnalysis
 import Global
-
-
-
 
 
 if __name__ == '__main__':
@@ -23,17 +17,5 @@ if __name__ == '__main__':
             msg, sub, date = EmailTool.ReEmail()
         except TimeoutError as e:
             print('TimeoutError')
-
-        #if sub == 'train':
-        #    print('train')
-        #    if running == False:
-        #        t = threading.Thread(target=run, args=(msg,))
-        #        t.start()
-        #    else:
-        #        EmailTool.SentEmail('Training is underway',
-        #                            'Training is underway',
-        #                            image=False)
-        #if sub == 'exit':
-        #    break
-        cmdana.Analy(sub,msg)
+        cmdana.Analy(sub, msg)
         a += 1

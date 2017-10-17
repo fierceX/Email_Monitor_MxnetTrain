@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from mxnet import autograd as autograd
 from mxnet import nd
 import mxnet as mx
+import os
 
 
 def try_gpu():
@@ -65,8 +66,14 @@ def GetNN():
     return net
 
 
-def NN_Train(net, train_data, test_data, epochs, batch_size, learning_rate, weight_decay):
+def NN_Train(net, train_data, test_data,params,nameparams):
     msg = ''
+
+    epochs = int(params['ep'])
+    batch_size = int(params['bs'])
+    learning_rate = params['lr']
+    weight_decay = params['wd']
+
     train_loss = []
     train_acc = []
     dataset_train = gluon.data.DataLoader(train_data, batch_size, shuffle=True)
@@ -120,6 +127,6 @@ def NN_Train(net, train_data, test_data, epochs, batch_size, learning_rate, weig
     ax2.legend(['Train_Acc', 'Test_Acc'], loc=1)
     ax2.set_ylabel('Acc')
 
-    plt.savefig('NN.png', dpi=600)
-    net.collect_params().save('NN.params')
+    plt.savefig(os.path.join(nameparams['dir'],nameparams['png']), dpi=600)
+    net.save_params(os.path.join(nameparams['dir'],nameparams['params']))
     return msg

@@ -1,7 +1,5 @@
 # coding: utf-8
-
 import poplib
-import time
 from email.parser import Parser
 from email.header import decode_header
 from envelopes import Envelope
@@ -17,6 +15,7 @@ def guess_charset(msg):
             charset = content_type[pos + 8:].strip()
     return charset
 
+
 def decode_str(s):
     value, charset = decode_header(s)[0]
     if charset:
@@ -31,26 +30,28 @@ def Get_info(msg):
             return Get_info(part)
     if not msg.is_multipart():
         content_type = msg.get_content_type()
-        if content_type=='text/plain':
+        if content_type == 'text/plain':
             content = msg.get_payload(decode=True)
             charset = guess_charset(msg)
             if charset:
                 content = content.decode(charset)
             return content
 
-def SentEmail(message,subject,image=True):
+
+def SentEmail(message, subject,imgpath, image=True):
     envelope = Envelope(
-    from_addr=(Global.useremail, u'Train'),
-    to_addr=(Global.toemail, u'FierceX'),
-    subject=subject,
-    text_body=message
+        from_addr=(Global.useremail, u'Train'),
+        to_addr=(Global.toemail, u'FierceX'),
+        subject=subject,
+        text_body=message
     )
     if image:
-        envelope.add_attachment('NN.png')
-    
+        envelope.add_attachment(imgpath)
+
     envelope.send(Global.smtphost, login=Global.useremail,
-              password=Global.password, tls=True)
-    
+                  password=Global.password, tls=True)
+
+
 def ReEmail():
     try:
         pp = poplib.POP3(Global.pophost)
@@ -67,8 +68,7 @@ def ReEmail():
             message = Get_info(msg)
             subject = msg.get('Subject')
             date = msg.get('Date')
-            return message,subject,date
+            return message, subject, date
     except ConnectionResetError as e:
         print('ConnectionResetError')
-    return None,None,None
-
+    return None, None, None
