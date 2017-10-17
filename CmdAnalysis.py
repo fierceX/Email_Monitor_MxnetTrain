@@ -1,4 +1,3 @@
-
 import multiprocessing
 from multiprocessing import Process
 import time
@@ -63,14 +62,13 @@ class TrainCmd(BaseCmd):
                 ks = k.split(' ')
                 if len(ks) > 1:
                     Global.params[ks[0]] = float(ks[1])
-            print(Global.params)
             t = threading.Thread(target=run)
             t.start()
         else:
-            EmailTool.SentEmail('Training is underway',
+            message = ('Training is underway\n%s\n%s') % (str(Global.params),str(Global.nameparams))
+            EmailTool.SentEmail(message,
                                 'Training is underway',
-                                None,
-                                mage=False)
+                                None)
 
 
 class ExitCmd(BaseCmd):
@@ -92,6 +90,7 @@ class SetNameParamsCmd(BaseCmd):
              if len(ks) > 1:
                  Global.nameparams[ks[0]] = ks[1]
         print(Global.nameparams)
+        EmailTool.SentEmail(str(Global.nameparams),'NameParams',None)
 
 
 class CmdAnaly:

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 from mxnet import gluon
 from mxnet.gluon import nn
 import matplotlib.pyplot as plt

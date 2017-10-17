@@ -1,4 +1,3 @@
-# coding: utf-8
 import poplib
 from email.parser import Parser
 from email.header import decode_header
@@ -38,14 +37,14 @@ def Get_info(msg):
             return content
 
 
-def SentEmail(message, subject,imgpath, image=True):
+def SentEmail(message, subject,imgpath):
     envelope = Envelope(
         from_addr=(Global.useremail, u'Train'),
         to_addr=(Global.toemail, u'FierceX'),
         subject=subject,
         text_body=message
     )
-    if image:
+    if imgpath is not None:
         envelope.add_attachment(imgpath)
 
     envelope.send(Global.smtphost, login=Global.useremail,
